@@ -1,5 +1,7 @@
 // Major stock exchanges by country/region
-// Based on Finnhub supported exchanges
+// Based on Finnhub supported exchanges and TradingView widgets
+
+export type MarketType = 'stocks' | 'commodities' | 'crypto' | 'forex';
 
 export type MarketExchange = {
     code: string;
@@ -7,6 +9,8 @@ export type MarketExchange = {
     country: string;
     region: string;
     timezone: string;
+    type?: MarketType;
+    tradingViewCode?: string; // TradingView-specific market code
 };
 
 export const MARKET_EXCHANGES: MarketExchange[] = [
@@ -123,4 +127,34 @@ export const searchExchanges = (query: string) => {
         ex.name.toLowerCase().includes(lowerQuery) ||
         ex.code.toLowerCase().includes(lowerQuery)
     );
+};
+
+// Commodities and other markets
+export const COMMODITY_MARKETS: MarketExchange[] = [
+    { code: 'GOLD', name: 'Gold (XAU/USD)', country: 'Global', region: 'Commodities', timezone: 'UTC', type: 'commodities', tradingViewCode: 'TVC:GOLD' },
+    { code: 'SILVER', name: 'Silver (XAG/USD)', country: 'Global', region: 'Commodities', timezone: 'UTC', type: 'commodities', tradingViewCode: 'TVC:SILVER' },
+    { code: 'OIL', name: 'Crude Oil (WTI)', country: 'Global', region: 'Commodities', timezone: 'UTC', type: 'commodities', tradingViewCode: 'NYMEX:CL1!' },
+    { code: 'BRENT', name: 'Brent Crude Oil', country: 'Global', region: 'Commodities', timezone: 'UTC', type: 'commodities', tradingViewCode: 'TVC:UKOIL' },
+    { code: 'NATGAS', name: 'Natural Gas', country: 'Global', region: 'Commodities', timezone: 'UTC', type: 'commodities', tradingViewCode: 'NYMEX:NG1!' },
+    { code: 'COPPER', name: 'Copper', country: 'Global', region: 'Commodities', timezone: 'UTC', type: 'commodities', tradingViewCode: 'COMEX:HG1!' },
+    { code: 'PLATINUM', name: 'Platinum', country: 'Global', region: 'Commodities', timezone: 'UTC', type: 'commodities', tradingViewCode: 'NYMEX:PL1!' },
+    { code: 'PALLADIUM', name: 'Palladium', country: 'Global', region: 'Commodities', timezone: 'UTC', type: 'commodities', tradingViewCode: 'NYMEX:PA1!' },
+];
+
+export const CRYPTO_MARKETS: MarketExchange[] = [
+    { code: 'BTC', name: 'Bitcoin (BTC/USD)', country: 'Global', region: 'Cryptocurrency', timezone: 'UTC', type: 'crypto', tradingViewCode: 'COINBASE:BTCUSD' },
+    { code: 'ETH', name: 'Ethereum (ETH/USD)', country: 'Global', region: 'Cryptocurrency', timezone: 'UTC', type: 'crypto', tradingViewCode: 'COINBASE:ETHUSD' },
+    { code: 'BNB', name: 'Binance Coin (BNB/USD)', country: 'Global', region: 'Cryptocurrency', timezone: 'UTC', type: 'crypto', tradingViewCode: 'BINANCE:BNBUSD' },
+    { code: 'XRP', name: 'Ripple (XRP/USD)', country: 'Global', region: 'Cryptocurrency', timezone: 'UTC', type: 'crypto', tradingViewCode: 'COINBASE:XRPUSD' },
+    { code: 'ADA', name: 'Cardano (ADA/USD)', country: 'Global', region: 'Cryptocurrency', timezone: 'UTC', type: 'crypto', tradingViewCode: 'COINBASE:ADAUSD' },
+    { code: 'SOL', name: 'Solana (SOL/USD)', country: 'Global', region: 'Cryptocurrency', timezone: 'UTC', type: 'crypto', tradingViewCode: 'COINBASE:SOLUSD' },
+    { code: 'DOGE', name: 'Dogecoin (DOGE/USD)', country: 'Global', region: 'Cryptocurrency', timezone: 'UTC', type: 'crypto', tradingViewCode: 'COINBASE:DOGEUSD' },
+];
+
+// Combined markets
+export const ALL_MARKETS = [...MARKET_EXCHANGES, ...COMMODITY_MARKETS, ...CRYPTO_MARKETS];
+
+// Get markets by type
+export const getMarketsByType = (type: MarketType) => {
+    return ALL_MARKETS.filter(m => m.type === type || (!m.type && type === 'stocks'));
 };

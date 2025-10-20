@@ -4,8 +4,8 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Globe, Search, Plus, Check } from "lucide-react"
-import { MARKET_EXCHANGES, searchExchanges, type MarketExchange } from "@/lib/market-exchanges"
+import { Globe, Search, Plus, Check, TrendingUp, Coins, DollarSign } from "lucide-react"
+import { ALL_MARKETS, searchExchanges, MARKET_EXCHANGES, COMMODITY_MARKETS, CRYPTO_MARKETS, type MarketExchange } from "@/lib/market-exchanges"
 import { addCustomMarket } from "@/lib/actions/custom-market.actions"
 import { toast } from "sonner"
 
@@ -18,10 +18,33 @@ export default function AddMarketDialog({ userId, existingMarkets = [] }: AddMar
     const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
     const [adding, setAdding] = useState<string | null>(null)
+    const [selectedTab, setSelectedTab] = useState<'all' | 'stocks' | 'commodities' | 'crypto'>('all')
 
-    const filteredExchanges = searchTerm.trim()
-        ? searchExchanges(searchTerm)
-        : MARKET_EXCHANGES;
+    let filteredExchanges: MarketExchange[] = [];
+
+    if (searchTerm.trim()) {
+        // Search across all markets
+        filteredExchanges = ALL_MARKETS.filter(ex =>
+            ex.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            ex.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            ex.code.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    } else {
+        // Filter by selected tab
+        switch (selectedTab) {
+            case 'stocks':
+                filteredExchanges = MARKET_EXCHANGES;
+                break;
+            case 'commodities':
+                filteredExchanges = COMMODITY_MARKETS;
+                break;
+            case 'crypto':
+                filteredExchanges = CRYPTO_MARKETS;
+                break;
+            default:
+                filteredExchanges = ALL_MARKETS;
+        }
+    }
 
     // Group by region for better organization
     const groupedByRegion = filteredExchanges.reduce((acc, exchange) => {
@@ -71,16 +94,56 @@ export default function AddMarketDialog({ userId, existingMarkets = [] }: AddMar
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Add Stock Market</DialogTitle>
+                    <DialogTitle>Add Market</DialogTitle>
                     <DialogDescription>
-                        Search and add stock markets from around the world to track on your dashboard.
+                        Track stock exchanges, commodities, and cryptocurrencies from around the world.
                     </DialogDescription>
                 </DialogHeader>
+
+                {/* Tab selector */}
+                <div className="flex gap-2 border-b border-gray-800 pb-3">
+                    <button
+                        onClick={() => setSelectedTab('all')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                            selectedTab === 'all' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800'
+                        }`}
+                    >
+                        <Globe className="h-4 w-4" />
+                        All Markets
+                    </button>
+                    <button
+                        onClick={() => setSelectedTab('stocks')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                            selectedTab === 'stocks' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800'
+                        }`}
+                    >
+                        <TrendingUp className="h-4 w-4" />
+                        Stocks
+                    </button>
+                    <button
+                        onClick={() => setSelectedTab('commodities')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                            selectedTab === 'commodities' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800'
+                        }`}
+                    >
+                        <Coins className="h-4 w-4" />
+                        Commodities
+                    </button>
+                    <button
+                        onClick={() => setSelectedTab('crypto')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                            selectedTab === 'crypto' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800'
+                        }`}
+                    >
+                        <DollarSign className="h-4 w-4" />
+                        Crypto
+                    </button>
+                </div>
 
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                     <Input
-                        placeholder="Search by country, exchange name, or code..."
+                        placeholder="Search by country, name, or code..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
