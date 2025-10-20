@@ -17,37 +17,71 @@ interface DynamicMarketWidgetsProps {
 }
 
 export default function DynamicMarketWidgets({ markets }: DynamicMarketWidgetsProps) {
-    const [selectedMarket, setSelectedMarket] = useState<Market | null>(markets[0] || null);
+    // Separate states for Overview and Heatmap
+    const [selectedOverviewMarket, setSelectedOverviewMarket] = useState<Market | null>(markets[0] || null);
+    const [selectedHeatmapMarket, setSelectedHeatmapMarket] = useState<Market | null>(markets[0] || null);
+
     const [marketOverviewConfig, setMarketOverviewConfig] = useState(() =>
         generateMarketOverviewConfig(markets)
     );
     const [heatmapConfig, setHeatmapConfig] = useState(() =>
         generateHeatmapConfig(markets[0])
     );
-    const [key, setKey] = useState(0); // Force re-render of widgets
+    const [overviewKey, setOverviewKey] = useState(0);
+    const [heatmapKey, setHeatmapKey] = useState(0);
 
     const scriptUrl = "https://s3.tradingview.com/external-embedding/embed-widget-";
 
-    // Update configs when selected market changes
+    // Update overview config when selected market changes
     useEffect(() => {
-        if (selectedMarket) {
-            setHeatmapConfig(generateHeatmapConfig(selectedMarket));
-            setKey(prev => prev + 1); // Force widget refresh
+        if (selectedOverviewMarket) {
+            // Generate config with selected market emphasized
+            const config = generateMarketOverviewConfig([selectedOverviewMarket, ...markets.filter(m => m.exchangeCode !== selectedOverviewMarket.exchangeCode)]);
+            setMarketOverviewConfig(config);
+            setOverviewKey(prev => prev + 1);
         }
-    }, [selectedMarket]);
+    }, [selectedOverviewMarket, markets]);
 
-    // Update market overview when markets list changes
+    // Update heatmap config when selected market changes
     useEffect(() => {
-        setMarketOverviewConfig(generateMarketOverviewConfig(markets));
-        setKey(prev => prev + 1);
+        if (selectedHeatmapMarket) {
+            setHeatmapConfig(generateHeatmapConfig(selectedHeatmapMarket));
+            setHeatmapKey(prev => prev + 1);
+        }
+    }, [selectedHeatmapMarket]);
+
+    // Initialize selected markets when markets list changes
+    useEffect(() => {
+        if (markets.length > 0) {
+            if (!selectedOverviewMarket || !markets.find(m => m.exchangeCode === selectedOverviewMarket.exchangeCode)) {
+                setSelectedOverviewMarket(markets[0]);
+            }
+            if (!selectedHeatmapMarket || !markets.find(m => m.exchangeCode === selectedHeatmapMarket.exchangeCode)) {
+                setSelectedHeatmapMarket(markets[0]);
+            }
+        }
     }, [markets]);
 
     return (
         <section className="grid w-full gap-8 home-section">
             <div className="md:col-span-1 xl:col-span-1">
+                <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-xl font-semibold">
+                        {selectedOverviewMarket
+                            ? `${selectedOverviewMarket.country} Market Overview`
+                            : "Market Overview"}
+                    </h3>
+                    {markets.length > 0 && (
+                        <MarketSelector
+                            markets={markets}
+                            selectedMarket={selectedOverviewMarket}
+                            onSelect={setSelectedOverviewMarket}
+                            label="Overview Market"
+                        />
+                    )}
+                </div>
                 <TradingViewWidget
-                    key={`overview-${key}`}
-                    title={markets.length > 0 ? "My Markets Overview" : "Market Overview"}
+                    key={`overview-${overviewKey}`}
                     scriptUrl={`${scriptUrl}market-overview.js`}
                     config={marketOverviewConfig}
                     className="custom-chart"
@@ -57,18 +91,21 @@ export default function DynamicMarketWidgets({ markets }: DynamicMarketWidgetsPr
             <div className="md-col-span xl:col-span-2">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-xl font-semibold">
-                        {selectedMarket ? `${selectedMarket.country} Heatmap` : "Stock Heatmap"}
+                        {selectedHeatmapMarket
+                            ? `${selectedHeatmapMarket.country} Heatmap`
+                            : "Stock Heatmap"}
                     </h3>
-                    {markets.length > 1 && (
+                    {markets.length > 0 && (
                         <MarketSelector
                             markets={markets}
-                            selectedMarket={selectedMarket}
-                            onSelect={setSelectedMarket}
+                            selectedMarket={selectedHeatmapMarket}
+                            onSelect={setSelectedHeatmapMarket}
+                            label="Heatmap Market"
                         />
                     )}
                 </div>
                 <TradingViewWidget
-                    key={`heatmap-${selectedMarket?.exchangeCode}-${key}`}
+                    key={`heatmap-${heatmapKey}`}
                     scriptUrl={`${scriptUrl}stock-heatmap.js`}
                     config={heatmapConfig}
                     height={600}
