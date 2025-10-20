@@ -2,7 +2,7 @@ services:
   openstock:
     build: .
     ports:
-      - "3000:3000"
+      - "8301:8301"
     env_file:
       - .env
     restart: unless-stopped
@@ -10,7 +10,7 @@ services:
       - mongodb
 
   mongodb:
-    image: mongo:7
+    image: docker.io/library/mongo:7
     container_name: mongodb
     restart: unless-stopped
     environment:

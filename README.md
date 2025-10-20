@@ -165,43 +165,72 @@ pnpm build && pnpm start
 npm run build && npm start
 ```
 
-Open http://localhost:3000 to view the app.
+Open http://localhost:8301 to view the app.
 
-## 🐳 Docker Setup
+## 🐳 Podman Setup (Recommended)
 
-You can run OpenStock and MongoDB easily with Docker Compose.
+You can run OpenStock and MongoDB easily with Podman Compose.
 
-1) Ensure Docker and Docker Compose are installed.
+1) Ensure Podman and podman-compose are installed:
+```bash
+# Install podman-compose (if not already installed)
+sudo dnf install podman-compose  # Fedora/RHEL
+# or
+pip3 install podman-compose  # via pip
+```
 
 2) docker-compose.yml includes two services:
 - openstock (this app)
 - mongodb (MongoDB database with a persistent volume)
 
-3) Create your `.env` (see examples below). For the Docker setup, use a local connection string like:
+3) Create your `.env` (see examples below). For the Podman setup, use a local connection string like:
 ```env
 MONGODB_URI=mongodb://root:example@mongodb:27017/openstock?authSource=admin
+PORT=8301
+BETTER_AUTH_URL=http://localhost:8301
+# For external/VPN access, replace localhost with your server's IP or domain:
+# BETTER_AUTH_URL=http://your-server-ip:8301
 ```
 
 4) Start the stack:
 ```bash
 # from the repository root
-docker compose up -d --build
+podman-compose up -d --build
+# or using Podman's native compose support (Podman 4.1+)
+podman compose up -d --build
 ```
 
 5) Access the app:
-- App: http://localhost:3000
-- MongoDB is available inside the Docker network at host mongodb:27017
+- Local: http://localhost:8301
+- Network: http://0.0.0.0:8301 (accessible from other devices on your network)
+- External/VPN: http://your-server-ip:8301 (update BETTER_AUTH_URL in .env accordingly)
+- MongoDB is available inside the container network at host mongodb:27017
 
 Notes
+- The app listens on 0.0.0.0, allowing connections from any interface (localhost, LAN, VPN).
+- For external access, ensure port 8301 is allowed through your firewall.
+- Update BETTER_AUTH_URL in .env to match your access method (localhost, IP, or domain).
 - The app service depends_on the mongodb service.
 - Credentials are defined in Compose for the MongoDB root user; authSource=admin is required on the connection string for root.
-- Data persists across restarts via the docker volume.
+- Data persists across restarts via the podman volume.
+- Podman runs rootless by default, providing better security than Docker.
+
+### Alternative: Docker Setup
+
+If you prefer Docker over Podman:
+
+```bash
+# Ensure Docker and Docker Compose are installed
+docker compose up -d --build
+```
+
+The same docker-compose.yml file works with both Docker and Podman.
 
 Optional: Example MongoDB service definition used in this project:
 ```yaml
 services:
   mongodb:
-    image: mongo:7
+    image: docker.io/library/mongo:7  # Full image path required for Podman
     container_name: mongodb
     restart: unless-stopped
     environment:
@@ -223,19 +252,20 @@ volumes:
 
 ## 🔐 Environment Variables
 
-Create `.env` at the project root. Choose either a hosted MongoDB (Atlas) URI or the local Docker URI.
+Create `.env` at the project root. Choose either a hosted MongoDB (Atlas) URI or the local Podman/Docker URI.
 
 Hosted (MongoDB Atlas):
 ```env
 # Core
 NODE_ENV=development
+PORT=8301
 
 # Database (Atlas)
 MONGODB_URI=mongodb+srv://<user>:<pass>@<cluster>/<db>?retryWrites=true&w=majority
 
 # Better Auth
 BETTER_AUTH_SECRET=your_better_auth_secret
-BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_URL=http://localhost:8301
 
 # Finnhub
 FINNHUB_API_KEY=your_finnhub_key
@@ -251,17 +281,18 @@ NODEMAILER_EMAIL=youraddress@gmail.com
 NODEMAILER_PASSWORD=your_gmail_app_password
 ```
 
-Local (Docker Compose) MongoDB:
+Local (Podman/Docker Compose) MongoDB:
 ```env
 # Core
 NODE_ENV=development
+PORT=8301
 
-# Database (Docker)
+# Database (Podman/Docker)
 MONGODB_URI=mongodb://root:example@mongodb:27017/openstock?authSource=admin
 
 # Better Auth
 BETTER_AUTH_SECRET=your_better_auth_secret
-BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_URL=http://localhost:8301
 
 # Finnhub
 FINNHUB_API_KEY=your_finnhub_key
@@ -281,6 +312,7 @@ Notes
 - If using `NEXT_PUBLIC_` variables, remember they are exposed to the browser.
 - In production, prefer a dedicated SMTP provider over a personal Gmail.
 - Do not hardcode secrets in the Dockerfile; use `.env` and Compose.
+- Copy `.env.example` to `.env` and fill in your actual credentials.
 
 ## 🧱 Project Structure
 
