@@ -12,6 +12,11 @@ export const getAuth = async () => {
         return authInstance;
     }
 
+    // Skip auth initialization during build
+    if (process.env.SKIP_DB_CONNECTION === 'true') {
+        throw new Error("Auth initialization skipped during build");
+    }
+
     const mongoose = await connectToDatabase();
     const db = mongoose.connection;
 
@@ -38,4 +43,38 @@ export const getAuth = async () => {
     return authInstance;
 }
 
-export const auth = await getAuth();
+// Initialize auth - returns a stub during build, real instance at runtime
+async function initAuth() {
+    try {
+        return await getAuth();
+    } catch (error) {
+        // During build time, return a stub that will never be called
+        console.log('Auth initialization deferred until runtime');
+        return null;
+    }
+}
+
+const authInstancePromise = initAuth();
+
+export const auth = new Proxy({} as Awaited<ReturnType<typeof getAuth>>, {
+    get(_, prop) {
+        return new Proxy({} as any, {
+            get(__, nestedProp) {
+                return async (...args: any[]) => {
+                    const instance = await authInstancePromise;
+                    if (!instance) {
+                        throw new Error('Auth not initialized - this should not be called during build');
+                    }
+                    return (instance as any)[prop][nestedProp](...args);
+                };
+            },
+            apply: async (___, ____, args: any[]) => {
+                const instance = await authInstancePromise;
+                if (!instance) {
+                    throw new Error('Auth not initialized - this should not be called during build');
+                }
+                return (instance as any)[prop](...args);
+            }
+        });
+    }
+});

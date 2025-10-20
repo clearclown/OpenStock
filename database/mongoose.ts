@@ -16,6 +16,17 @@ if (!cached){
 }
 
 export const connectToDatabase = async () => {
+    // Skip database connection during build time
+    if (process.env.SKIP_DB_CONNECTION === 'true') {
+        console.log('Skipping database connection during build phase');
+        // Return a mock connection for build time
+        return {
+            connection: {
+                db: null
+            }
+        } as typeof mongoose;
+    }
+
     if(!MONGODB_URI){
         throw new Error("MongoDB URI is missing");
     }
@@ -23,7 +34,10 @@ export const connectToDatabase = async () => {
     if(cached.conn) return cached.conn;
 
     if(!cached.promise) {
-        cached.promise = mongoose.connect(MONGODB_URI, {bufferCommands: false});
+        cached.promise = mongoose.connect(MONGODB_URI, {
+            bufferCommands: false,
+            serverSelectionTimeoutMS: 10000,
+        });
     }
 
     try{
