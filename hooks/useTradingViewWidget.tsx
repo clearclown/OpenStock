@@ -11,6 +11,13 @@ const useTradingViewWidget = (scriptUrl: string, config: Record<string, unknown>
         containerRef.current.innerHTML = '';
         delete containerRef.current.dataset.loaded;
 
+        // Debug: Log the config being used
+        console.log('🔧 TradingView Widget Config:', {
+            scriptUrl,
+            config,
+            configJSON: JSON.stringify(config, null, 2)
+        });
+
         // Create widget container
         const widgetContainer = document.createElement('div');
         widgetContainer.className = 'tradingview-widget-container__widget';

@@ -44,55 +44,56 @@ export const generateMarketOverviewConfig = (markets: MarketConfig[]) => {
 
 // Generate Stock Heatmap config based on market
 export const generateHeatmapConfig = (primaryMarket?: MarketConfig) => {
-    // TradingView Stock Heatmap uses country-based dataSources
-    let dataSource = 'USA'; // Default to USA
+    // TradingView Stock Heatmap uses INDEX CODES as dataSource, not country names!
+    // Reference: original HEATMAP_WIDGET_CONFIG used 'SPX500'
+    let dataSource = 'SPX500'; // Default to S&P 500
 
     if (primaryMarket) {
         const { country, region, exchangeCode } = primaryMarket;
 
-        // Map to TradingView country codes
+        // Map to TradingView INDEX codes (verified from original config)
         if (country === 'Japan' || exchangeCode === 'T') {
-            dataSource = 'Japan';
+            dataSource = 'NI225'; // Nikkei 225
         } else if (country === 'United Kingdom' || exchangeCode === 'L') {
-            dataSource = 'UK';
+            dataSource = 'FTSE100'; // FTSE 100
         } else if (country === 'Germany' || exchangeCode === 'F') {
-            dataSource = 'Germany';
+            dataSource = 'DAX'; // DAX 40
         } else if (country === 'France' || exchangeCode === 'PA') {
-            dataSource = 'France';
+            dataSource = 'CAC40'; // CAC 40
         } else if (country === 'Hong Kong' || exchangeCode === 'HK') {
-            dataSource = 'HongKong';
+            dataSource = 'HSI'; // Hang Seng
         } else if (country === 'China') {
-            dataSource = 'China';
+            dataSource = 'SSE'; // Shanghai Composite
         } else if (country === 'Australia' || exchangeCode === 'ASX') {
-            dataSource = 'Australia';
+            dataSource = 'ASX200'; // ASX 200
         } else if (country === 'India' || exchangeCode === 'BSE' || exchangeCode === 'NSE') {
-            dataSource = 'India';
+            dataSource = 'SENSEX'; // BSE Sensex
         } else if (country === 'South Korea' || exchangeCode === 'KRX') {
-            dataSource = 'SouthKorea';
+            dataSource = 'KRX'; // KOSPI
         } else if (country === 'Canada') {
-            dataSource = 'Canada';
+            dataSource = 'TSX'; // S&P/TSX Composite
         } else if (country === 'Brazil') {
-            dataSource = 'Brazil';
+            dataSource = 'IBOV'; // Bovespa
         } else if (country === 'Russia') {
-            dataSource = 'Russia';
+            dataSource = 'RTSI'; // RTS Index
         } else if (country === 'Italy') {
-            dataSource = 'Italy';
+            dataSource = 'MIB'; // FTSE MIB
         } else if (country === 'Spain') {
-            dataSource = 'Spain';
+            dataSource = 'IBEX35'; // IBEX 35
         } else if (country === 'Netherlands') {
-            dataSource = 'Netherlands';
+            dataSource = 'AEX'; // AEX
         } else if (country === 'Switzerland') {
-            dataSource = 'Switzerland';
+            dataSource = 'SMI'; // SMI
         } else if (country === 'Sweden') {
-            dataSource = 'Sweden';
+            dataSource = 'OMX'; // OMX Stockholm 30
         } else if (country === 'Singapore') {
-            dataSource = 'Singapore';
+            dataSource = 'STI'; // Straits Times Index
         } else if (region === 'Commodities') {
-            dataSource = 'USA'; // Commodities use US market
+            dataSource = 'SPX500'; // Commodities - use default
         } else if (region === 'Cryptocurrency') {
-            dataSource = 'USA'; // Crypto uses US market
+            dataSource = 'SPX500'; // Crypto - use default
         } else {
-            dataSource = 'USA'; // Default
+            dataSource = 'SPX500'; // Default to S&P 500
         }
     }
 

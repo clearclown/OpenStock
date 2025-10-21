@@ -35,8 +35,10 @@ export default function DynamicMarketWidgets({ markets }: DynamicMarketWidgetsPr
     // Update overview config when selected market changes
     useEffect(() => {
         if (selectedOverviewMarket) {
+            console.log('📈 Overview Market Changed:', selectedOverviewMarket);
             // Generate config with selected market emphasized
             const config = generateMarketOverviewConfig([selectedOverviewMarket, ...markets.filter(m => m.exchangeCode !== selectedOverviewMarket.exchangeCode)]);
+            console.log('📈 Generated Overview Config:', config);
             setMarketOverviewConfig(config);
             setOverviewKey(prev => prev + 1);
         }
@@ -45,7 +47,10 @@ export default function DynamicMarketWidgets({ markets }: DynamicMarketWidgetsPr
     // Update heatmap config when selected market changes
     useEffect(() => {
         if (selectedHeatmapMarket) {
-            setHeatmapConfig(generateHeatmapConfig(selectedHeatmapMarket));
+            console.log('📊 Heatmap Market Changed:', selectedHeatmapMarket);
+            const newConfig = generateHeatmapConfig(selectedHeatmapMarket);
+            console.log('📊 Generated Heatmap Config:', newConfig);
+            setHeatmapConfig(newConfig);
             setHeatmapKey(prev => prev + 1);
         }
     }, [selectedHeatmapMarket]);
