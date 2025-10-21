@@ -44,55 +44,55 @@ export const generateMarketOverviewConfig = (markets: MarketConfig[]) => {
 
 // Generate Stock Heatmap config based on market
 export const generateHeatmapConfig = (primaryMarket?: MarketConfig) => {
-    let dataSource = 'SPX500'; // Default to S&P 500
-    let exchanges: string[] = [];
+    // TradingView Stock Heatmap uses country-based dataSources
+    let dataSource = 'USA'; // Default to USA
 
     if (primaryMarket) {
-        // Map regions/countries to TradingView data sources
         const { country, region, exchangeCode } = primaryMarket;
 
+        // Map to TradingView country codes
         if (country === 'Japan' || exchangeCode === 'T') {
-            dataSource = 'NI225'; // Nikkei 225
-            exchanges = ['TSE']; // Tokyo Stock Exchange
+            dataSource = 'Japan';
         } else if (country === 'United Kingdom' || exchangeCode === 'L') {
-            dataSource = 'FTSE100'; // FTSE 100
-            exchanges = ['LSE']; // London Stock Exchange
+            dataSource = 'UK';
         } else if (country === 'Germany' || exchangeCode === 'F') {
-            dataSource = 'DAX'; // DAX
-            exchanges = ['XETR']; // XETRA
+            dataSource = 'Germany';
         } else if (country === 'France' || exchangeCode === 'PA') {
-            dataSource = 'CAC40'; // CAC 40
-            exchanges = ['EURONEXT']; // Euronext Paris
+            dataSource = 'France';
         } else if (country === 'Hong Kong' || exchangeCode === 'HK') {
-            dataSource = 'HSI'; // Hang Seng
-            exchanges = ['HKEX']; // Hong Kong Exchange
+            dataSource = 'HongKong';
         } else if (country === 'China') {
-            dataSource = 'SSE'; // Shanghai Composite
-            exchanges = ['SSE', 'SZSE']; // Shanghai & Shenzhen
+            dataSource = 'China';
         } else if (country === 'Australia' || exchangeCode === 'ASX') {
-            dataSource = 'ASX200'; // ASX 200
-            exchanges = ['ASX']; // Australian Securities Exchange
+            dataSource = 'Australia';
         } else if (country === 'India' || exchangeCode === 'BSE' || exchangeCode === 'NSE') {
-            dataSource = 'SENSEX'; // BSE Sensex
-            exchanges = ['BSE', 'NSE']; // Bombay & National Stock Exchange
+            dataSource = 'India';
         } else if (country === 'South Korea' || exchangeCode === 'KRX') {
-            dataSource = 'KRX'; // KOSPI
-            exchanges = ['KRX']; // Korea Exchange
-        } else if (region === 'Europe') {
-            dataSource = 'STOXX50E'; // Euro Stoxx 50
-            exchanges = ['EURONEXT', 'XETR']; // European exchanges
+            dataSource = 'SouthKorea';
+        } else if (country === 'Canada') {
+            dataSource = 'Canada';
+        } else if (country === 'Brazil') {
+            dataSource = 'Brazil';
+        } else if (country === 'Russia') {
+            dataSource = 'Russia';
+        } else if (country === 'Italy') {
+            dataSource = 'Italy';
+        } else if (country === 'Spain') {
+            dataSource = 'Spain';
+        } else if (country === 'Netherlands') {
+            dataSource = 'Netherlands';
+        } else if (country === 'Switzerland') {
+            dataSource = 'Switzerland';
+        } else if (country === 'Sweden') {
+            dataSource = 'Sweden';
+        } else if (country === 'Singapore') {
+            dataSource = 'Singapore';
         } else if (region === 'Commodities') {
-            // For commodities, use world market
-            dataSource = 'ALL_COMMODITIES';
-            exchanges = [];
+            dataSource = 'USA'; // Commodities use US market
         } else if (region === 'Cryptocurrency') {
-            // For crypto, use crypto market
-            dataSource = 'CRYPTO';
-            exchanges = [];
+            dataSource = 'USA'; // Crypto uses US market
         } else {
-            // Default to US markets
-            dataSource = 'SPX500';
-            exchanges = [];
+            dataSource = 'USA'; // Default
         }
     }
 
@@ -105,7 +105,7 @@ export const generateHeatmapConfig = (primaryMarket?: MarketConfig) => {
         locale: 'en',
         symbolUrl: '',
         colorTheme: 'dark',
-        exchanges,
+        exchanges: [],
         hasTopBar: false,
         isDataSetEnabled: false,
         isZoomEnabled: true,
